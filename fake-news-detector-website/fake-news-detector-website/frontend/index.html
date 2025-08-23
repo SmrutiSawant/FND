@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fake News Detector</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-50">
+  <div class="max-w-4xl mx-auto p-6">
+    <header class="mb-6">
+      <h1 class="text-3xl font-bold">🕵️‍♀️ Fake News Detection</h1>
+      <p class="text-gray-600">Try multiple ML models on your text in real-time.</p>
+    </header>
+
+    <section class="bg-white rounded-2xl shadow p-6 mb-6">
+      <div class="grid gap-4">
+        <label class="font-medium">Paste headline/article text</label>
+        <textarea id="inputText" class="w-full rounded-xl border p-3" rows="5" placeholder="Paste news text here..."></textarea>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="font-medium">Choose Model</label>
+            <select id="modelSelect" class="w-full rounded-xl border p-3 mt-1">
+              <option value="logreg">Logistic Regression</option>
+              <option value="svm">Linear SVM (Calibrated)</option>
+              <option value="rf">Random Forest</option>
+              <option value="nb">Multinomial Naive Bayes</option>
+              <option value="ensemble">Ensemble (soft voting)</option>
+            </select>
+            <p id="modelsHint" class="text-xs text-gray-500 mt-1">Tip: Train first to enable models. See README.</p>
+          </div>
+
+          <div class="flex items-end">
+            <button id="predictBtn" class="w-full bg-black text-white rounded-2xl px-4 py-3 font-semibold">Detect</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="resultCard" class="hidden bg-white rounded-2xl shadow p-6">
+      <h2 class="text-xl font-semibold mb-2">Result</h2>
+      <div id="resultLabel" class="text-2xl font-bold"></div>
+      <pre id="resultJSON" class="mt-3 text-sm bg-gray-100 p-3 rounded-lg overflow-x-auto"></pre>
+    </section>
+
+    <footer class="mt-10 text-sm text-gray-500">
+      Built with FastAPI + scikit-learn. Customize the dataset & models in <code>backend/train.py</code>.
+    </footer>
+  </div>
+
+<script>
+const API = "http://localhost:8000"; // change if needed
+
+async function refreshAvailableModels() {
+  try {
+    const res = await fetch(`${API}/models`);
+    const data = await res.json();
+    const hint = document.getElementById("modelsHint");
+    if (data && data.available) {
+      hint.textContent = "Available models: " + data.available.join(", ");
+    } else {
+      hint.textContent = "No models found. Run training first (see README).";
+    }
+  } catch (e) {
+    document.getElementById("modelsHint").textContent = "Backend not reachable. Start FastAPI (see README).";
+  }
+}
+
+async function predict() {
+  const text = document.getElementById("inputText").value.trim();
+  const model = document.getElementById("modelSelect").value;
+  if (!text) {
+    alert("Please paste some text.");
+    return;
+  }
+  const res = await fetch(`${API}/predict`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ text, model }),
+  });
+  const data = await res.json();
+
+  const card = document.getElementById("resultCard");
+  const label = document.getElementById("resultLabel");
+  const jsonEl = document.getElementById("resultJSON");
+
+  if (data.ok) {
+    label.textContent = `Prediction: ${data.result.label}`;
+    jsonEl.textContent = JSON.stringify(data.result, null, 2);
+  } else {
+    label.textContent = "Error";
+    jsonEl.textContent = JSON.stringify(data, null, 2);
+  }
+  card.classList.remove("hidden");
+}
+
+document.getElementById("predictBtn").addEventListener("click", predict);
+window.addEventListener("load", refreshAvailableModels);
+</script>
+</body>
+</html>
