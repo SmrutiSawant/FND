@@ -7,8 +7,6 @@ This is a **minimal, production-ready scaffold** for a fake news detection websi
 - Multinomial Naive Bayes
 - (Optional) Soft Voting Ensemble across the above (where probability is available)
 
-> Note: You mentioned "random forest regressor"; for classification we should use **RandomForestClassifier**.
-
 ## Project Structure
 ```
 fake-news-detector-website/
@@ -66,4 +64,3 @@ python backend/train.py --csv data/your_dataset.csv
 - For models that don’t support probabilities (e.g., `LinearSVC`), the API returns a **decision score** instead of probability.
 - The ensemble uses soft voting when probabilities are available; SVM votes via sigmoid-calibrated probabilities (`CalibratedClassifierCV`).
 
-Enjoy hacking! 🚀
