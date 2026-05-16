@@ -5,7 +5,7 @@ This is a **minimal, production-ready scaffold** for a fake news detection websi
 - Linear SVM (LinearSVC)
 - Random Forest Classifier
 - Multinomial Naive Bayes
-- (Optional) Soft Voting Ensemble across the above (where probability is available)
+- Soft Voting Ensemble
 
 ## Project Structure
 ```
@@ -33,7 +33,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-2) **Train models** (uses the tiny `data/sample.csv` by default—replace with your dataset later):
+2) **Train models** 
 ```bash
 python backend/train.py
 # This will generate joblib files under ./models
@@ -53,11 +53,6 @@ python -m http.server 8080 -d frontend
 ```
 > The frontend expects the API at `http://localhost:8000`. Change it in `index.html` if needed.
 
-## Replace the dataset
-- Put your CSV (columns: `text,label`) under `data/` and change the `--csv` argument:
-```bash
-python backend/train.py --csv data/your_dataset.csv
-```
 
 ## Notes
 - Pipelines use `TfidfVectorizer` + chosen classifier per model.
